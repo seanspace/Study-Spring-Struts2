@@ -1,0 +1,67 @@
+ 在web环境下使用spring.
+
+1. 两个jar包
+
+2. spring配置文件.
+
+3. 在web.xml中配置如下.
+  
+  	<!-- 配置Spring配置文件的名称和位置 -->
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>classpath:applicationContext.xml</param-value>
+	</context-param>
+
+	<!-- 启动IOC容器的监听器. -->
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+	
+	
+Spring如何整合Struts2?
+
+1. 整合目标?
+	使IOC容器来管理Struts2的Action!
+	
+2. 如何整合?
+1). 正常加入Struts2
+2). 在Spring的ioc容器中配置Struts2的Action
+	<!-- 需要注意: 在IOC容器中配置Struts2的Action时,需要配置scope属性,其值必须为prototype,即Struts2的Action是非单例的. -->
+	<bean id="personAction"
+		class="com.bin.spring.struts2.action2.PersonAction"
+		scope="prototype">
+		<property name="personService" ref="personService"></property>
+	</bean>
+	
+3). 配置Struts2的配置文件
+    <package name="default" namespace="/" extends="struts-default">
+    <!--  
+    	注意:Spring整合Struts2时,在Struts2中配置的Spring的Action的class属性的值指向IOC容器该bean的id.
+    -->
+		<action name="person-save" class="personAction">
+			<result name="success">/success.jsp</result>
+		</action>
+
+    </package>
+4). 加入jar包
+struts2-spring-plugin-2.3.16.3.jar
+
+5). 整合原理:
+	struts2-spring-plugin-2.3.16.3.jar
+	
+	在上面jar包中,有如下方法:会先从IOC容器中取Action实例,若失败则从通过反射自行创建实例.
+	
+	public Object buildBean(String beanName, Map<String, Object> extraContext, boolean injectInternal) throws Exception {
+        Object o;
+        if (appContext.containsBean(beanName)) {
+            o = appContext.getBean(beanName);
+        } else {
+            Class beanClazz = getClassInstance(beanName);
+            o = buildBean(beanClazz, extraContext);
+        }
+        if (injectInternal) {
+            injectInternalBeans(o);
+        }
+        return o;
+    }
+	

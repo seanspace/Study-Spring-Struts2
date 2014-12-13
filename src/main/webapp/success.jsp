@@ -7,7 +7,6 @@
 <title>Insert title here</title>
 </head>
 <body>
-
-<a href="person-save">person-save</a>
+	<h1>success</h1>
 </body>
 </html>
